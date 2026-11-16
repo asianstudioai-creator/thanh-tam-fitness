@@ -8,6 +8,7 @@ Trang tĩnh (HTML/CSS/JS thuần), chạy trên Netlify. Bốn ngôn ngữ: Vi�
 | `i18n.js` | Bảng dịch: khóa là câu tiếng Việt, giá trị là `[English, 中文, Русский]` |
 | `app.js` | Chuyển ngôn ngữ, băng chuyền, công cụ BMI, gửi đăng ký |
 | `netlify/functions/lead.js` | Nhận đăng ký, tự gửi tin về Zalo OA và Facebook Messenger |
+| `netlify/functions/chat.mjs` | Trợ lý AI: nhận câu hỏi của khách và gọi Claude để trả lời |
 | `netlify/functions/clips.js` | Lấy clip mới nhất của Trang Facebook để mục clip tự cập nhật |
 | `reviews.js` | Danh sách đánh giá của học viên hiển thị trên trang |
 | `netlify.toml` | Cấu hình Netlify |
@@ -38,6 +39,8 @@ Chưa đặt biến nào thì kênh đó bị bỏ qua, đăng ký vẫn đượ
 | `FB_PAGE_ACCESS_TOKEN` | Trang (Page) Facebook → developers.facebook.com → ứng dụng có quyền `pages_messaging` |
 | `FB_RECIPIENT_PSID` | Mã PSID của người nhận tin (người này phải từng nhắn cho Trang) |
 | `FB_PAGE_ID` | Mã số của Trang Facebook; có biến này cùng `FB_PAGE_ACCESS_TOKEN` thì mục clip tự lấy clip mới |
+| `ANTHROPIC_API_KEY` | Khóa Claude API (console.anthropic.com) cho trợ lý AI; chưa có thì trợ lý trả lời bằng mục Hỏi đáp có sẵn |
+| `CHAT_MODEL` | Không bắt buộc; mặc định `claude-opus-5-5`. Đặt `claude-haiku-5-5` nếu muốn chi phí thấp hơn |
 | `FB_MESSAGE_TAG` | Không bắt buộc; mặc định `ACCOUNT_UPDATE` |
 
 Lưu ý:

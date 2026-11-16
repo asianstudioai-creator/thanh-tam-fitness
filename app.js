@@ -79,13 +79,28 @@
   });
   go(0);
 
-  // ----- trạng thái mở cửa (5:30–21:00) -----
-  function renderStatus() {
-    const d = new Date(), m = d.getHours() * 60 + d.getMinutes(), open = m >= 330 && m < 1260;
-    $('status').innerHTML = open
-      ? '<i class="dot live"></i>' + t('Đang nhận lịch · đến 21:00')
-      : '<i class="dot"></i>' + t('Đang nghỉ · mở lại lúc 5:30');
+  // ----- đồng hồ ngày giờ và trạng thái mở cửa (5:00–21:00, theo giờ Việt Nam) -----
+  const TZ = 'Asia/Ho_Chi_Minh', LOCALE = { vi: 'vi-VN', en: 'en-GB', zh: 'zh-CN', ru: 'ru-RU' };
+  function vnMinutes() {
+    const p = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: TZ }).formatToParts(new Date());
+    const get = k => +p.find(x => x.type === k).value;
+    return (get('hour') % 24) * 60 + get('minute');
   }
+  function renderClock() {
+    const now = new Date(), loc = LOCALE[lang];
+    const date = new Intl.DateTimeFormat(loc, { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', timeZone: TZ }).format(now);
+    const time = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: TZ }).format(now);
+    $('clock').textContent = date.charAt(0).toUpperCase() + date.slice(1) + ' · ' + time;
+  }
+  let lastOpen = null;
+  function renderStatus() {
+    const m = vnMinutes(), open = m >= 300 && m < 1260;
+    lastOpen = open;
+    $('status').innerHTML = open
+      ? '<i class="dot live"></i>' + t('Đang mở cửa · 5:00 – 21:00')
+      : '<i class="dot"></i>' + t('Đang nghỉ · mở lại lúc 5:00');
+  }
+  setInterval(() => { renderClock(); const m = vnMinutes(); if ((m >= 300 && m < 1260) !== lastOpen) renderStatus(); }, 1000);
 
   // ----- video -----
   const vids = ['LYuBJZWs3dM', 'T26d9EeZcYw', 'WmrZKBK-izA', 'ZUZ0mXQFgvE', '_Kz3dgbsXA4', 'alloaLvZIzQ', 'hoLcqKKcHro', 'ptdWBs7R9-I', 'viwoIGlxAS0', 'wuelfJfQujQ'];
@@ -193,7 +208,7 @@
   function closeOk() { ok.hidden = true; }
   $('okClose').onclick = closeOk;
   ok.addEventListener('click', e => { if (e.target === ok) closeOk(); });
-  addEventListener('keydown', e => { if (e.key === 'Escape') { setMenu(false); closeOk(); } });
+  addEventListener('keydown', e => { if (e.key === 'Escape') { setMenu(false); closeOk(); toggleChat(false); } });
 
   lead.addEventListener('submit', async e => {
     e.preventDefault();
@@ -238,6 +253,71 @@
     }
   });
 
+  // ----- trợ lý AI -----
+  const chatBtn = $('chatBtn'), chatBox = $('chat'), chatLog = $('chatLog'), chatForm = $('chatForm'), chatIn = $('chatIn');
+  let chatMsgs = [], chatBusy = false, chatAI = true;
+  function bubble(role, text, extra) {
+    const d = document.createElement('div');
+    d.className = 'b ' + role + (extra ? ' ' + extra : '');
+    d.textContent = text;
+    chatLog.append(d);
+  }
+  function renderChat() {
+    chatBtn.setAttribute('aria-label', t('Trợ lý AI'));
+    $('chatTitle').textContent = t('Trợ lý AI');
+    $('chatNote').textContent = t('Câu trả lời do AI tạo tự động và có thể chưa chính xác. Việc quan trọng, bạn hãy hỏi trực tiếp Thanh Tâm.');
+    chatIn.placeholder = t('Nhập câu hỏi của bạn…');
+    $('chatSend').textContent = t('Gửi');
+    chatLog.innerHTML = '';
+    bubble('assistant', t('Xin chào! Mình là trợ lý tự động của Thanh Tâm Fitness. Bạn muốn hỏi gì về gói tập, giờ mở cửa hay cách đăng ký?'));
+    chatMsgs.forEach(m => bubble(m.role, m.content));
+    if (chatBusy) bubble('assistant', '•••', 'wait');
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+  function toggleChat(open) {
+    chatBox.hidden = !open;
+    chatBtn.setAttribute('aria-expanded', open);
+    if (open) { renderChat(); chatIn.focus(); }
+  }
+  chatBtn.onclick = () => toggleChat(chatBox.hidden);
+  $('chatClose').onclick = () => toggleChat(false);
+
+  // trả lời dự phòng khi chưa bật AI: tìm trong mục Hỏi đáp trên trang
+  const STOP = new Set('có không được là và thì mà của cho với the a an is are do does can i you to of and or in on for my me it what how что как это ли на в и я вы'.split(' '));
+  function localAnswer(q) {
+    const s = q.toLowerCase();
+    if (/giờ|mở cửa|đóng cửa|open|close|hour|часы|работает|открыт|几点|营业|时间/.test(s)) return t('Thanh Tâm mở cửa từ 5:00 đến 21:00.');
+    if (/giá|học phí|bao nhiêu tiền|chi phí|price|cost|fee|цена|стоит|сколько|价格|多少钱|费用/.test(s)) return t('Học phí tùy theo số buổi và mục tiêu. Bạn nhắn Zalo 0702 791 521 hoặc điền biểu mẫu đăng ký để nhận báo giá; buổi tư vấn đầu tiên miễn phí.');
+    const words = (s.match(/[\p{L}\p{N}]+/gu) || []).filter(w => w.length > 1 && !STOP.has(w));
+    let best = null, top = 0;
+    document.querySelectorAll('.faq details').forEach(d => {
+      const head = d.querySelector('summary').textContent.toLowerCase(), body = d.querySelector('p').textContent;
+      let score = 0;
+      words.forEach(w => { if (head.includes(w)) score += 2; else if (body.toLowerCase().includes(w)) score += 1; });
+      if (score > top) { top = score; best = body; }
+    });
+    return top >= 4 ? best : t('Mình chưa có sẵn câu trả lời cho câu này. Bạn nhắn Zalo 0702 791 521 để Thanh Tâm trả lời trực tiếp nhé.');
+  }
+  chatForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const q = chatIn.value.trim();
+    if (!q || chatBusy) return;
+    chatIn.value = '';
+    chatMsgs.push({ role: 'user', content: q.slice(0, 800) });
+    chatBusy = true; renderChat();
+    let a = null;
+    if (chatAI && chatMsgs.length <= 40) {
+      try {
+        const r = await fetch('/.netlify/functions/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: chatMsgs.slice(-12), lang }) });
+        if (r.ok) a = (await r.json()).reply || null;
+        else if (r.status !== 429 && r.status !== 502) chatAI = false; // chưa cấu hình AI: dùng câu trả lời có sẵn
+      } catch (err) {}
+    }
+    if (!a) a = localAnswer(q);
+    chatMsgs.push({ role: 'assistant', content: a });
+    chatBusy = false; renderChat();
+  });
+
   // ----- ngôn ngữ -----
   const sel = $('lang');
   function setLang(l, save) {
@@ -245,7 +325,7 @@
     root.lang = lang === 'zh' ? 'zh-Hans' : lang;
     sel.value = lang;
     if (save) { try { localStorage.setItem('lang', lang); } catch (e) {} }
-    translateStatic(); renderStatus(); renderVideos(); renderClips(); renderReviews(); renderResult(); renderForm();
+    translateStatic(); renderClock(); renderStatus(); renderVideos(); renderClips(); renderReviews(); renderResult(); renderForm(); if (!chatBox.hidden) renderChat();
   }
   sel.onchange = () => setLang(sel.value, true);
   let first = new URLSearchParams(location.search).get('lang');

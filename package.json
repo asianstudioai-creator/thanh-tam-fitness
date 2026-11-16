@@ -1,0 +1,8 @@
+{
+  "name": "thanh-tam-fitness",
+  "private": true,
+  "description": "Trang chủ Thanh Tâm Fitness (trang tĩnh + Netlify Functions)",
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest"
+  }
+}

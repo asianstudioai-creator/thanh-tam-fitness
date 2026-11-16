@@ -148,6 +148,45 @@ html[lang^=zh] h1,html[lang^=zh] h2,html[lang^=zh] h3{letter-spacing:.04em}
 .b1{--art:repeating-linear-gradient(115deg,#0000000a 0 2px,transparent 2px 50px),radial-gradient(circle at 50% 50%,#35c98a44,transparent 60%),#f1f8f4}
 .b2{--art:repeating-linear-gradient(65deg,#0000000a 0 2px,transparent 2px 50px),radial-gradient(circle at 50% 50%,#e5202e33,transparent 60%),#fbf3f3}
 
+/* ---------- clock, animated icons, chat ---------- */
+.clock{display:inline-flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+.clock svg{width:18px;height:18px;fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round}
+.clock .hand{transform-origin:12px 12px;animation:spin 6s linear infinite}
+.clock .hand2{transform-origin:12px 12px;animation:spin 60s linear infinite}
+.ico{width:46px;height:46px;fill:none;stroke:var(--accent);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
+.step{position:relative}
+.step .ico{position:absolute;right:24px;top:34px}
+.i-bob{animation:bob 2.4s ease-in-out infinite}
+.dots3{stroke-width:2.6;animation:blink 1.4s steps(3,end) infinite}
+.i-beat{transform-origin:12px 13px;animation:beat 1.3s ease-in-out infinite}
+.i-draw{stroke:var(--text);stroke-dasharray:30;animation:dash 2.2s linear infinite}
+.i-wave{transform-origin:6px 9px;animation:wave 1.8s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bob{50%{transform:translateY(-5px)}}
+@keyframes blink{0%{opacity:.2}50%{opacity:1}100%{opacity:.2}}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.14)}30%{transform:scale(1)}45%{transform:scale(1.1)}}
+@keyframes dash{from{stroke-dashoffset:60}to{stroke-dashoffset:0}}
+@keyframes wave{0%,100%{transform:skewY(0)}50%{transform:skewY(-7deg)}}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(229,32,46,.5)}100%{box-shadow:0 0 0 16px rgba(229,32,46,0)}}
+.dot.live{animation:ringg 1.8s ease-out infinite}
+@keyframes ringg{0%{box-shadow:0 0 0 0 #35c98a88}100%{box-shadow:0 0 0 9px #35c98a00}}
+.chatfab{position:fixed;left:16px;bottom:16px;z-index:60;width:56px;height:56px;border-radius:50%;border:0;background:var(--text);color:#fff;cursor:pointer;display:grid;place-items:center;animation:ring 2.2s ease-out infinite}
+.chatfab svg{width:28px;height:28px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chat{position:fixed;left:16px;bottom:84px;z-index:60;width:min(370px,calc(100vw - 32px));height:min(520px,calc(100svh - 150px));background:#fff;border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.28);display:flex;flex-direction:column;animation:pop .22s ease-out}
+.chat[hidden]{display:none}
+.chat header{background:var(--text);color:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;font:700 17px var(--head);letter-spacing:.06em;text-transform:uppercase}
+.chat header button{background:none;border:0;color:#fff;font-size:22px;cursor:pointer;line-height:1}
+.chat .log{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--panel)}
+.chat .b{max-width:86%;padding:9px 12px;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.chat .b.assistant{background:#fff;border:1px solid var(--line);align-self:flex-start}
+.chat .b.user{background:var(--accent);color:#fff;align-self:flex-end}
+.chat .b.wait{letter-spacing:.3em;animation:blink 1.2s infinite}
+.chat .note{font-size:11px;color:var(--muted);padding:6px 14px;border-top:1px solid var(--line);line-height:1.4}
+.chat form{display:flex;border-top:1px solid var(--line)}
+.chat form input{border:0;flex:1;height:48px}
+.chat form button{border:0;background:var(--accent);color:#fff;padding:0 18px;font:700 14px var(--head);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+
 /* ---------- student clips & reviews ---------- */
 .clips{display:grid;gap:22px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
 .clip{background:#fff;border:1px solid var(--line);box-shadow:0 6px 24px rgba(0,0,0,.06);display:flex;flex-direction:column}
@@ -336,6 +375,7 @@ footer li{list-style:none;margin-bottom:7px}footer a:hover{color:var(--accent)}
 </section>
 
 <div class="strip"><div class="wrap">
+  <span class="clock"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path class="hand2" d="M12 12V8"/><path class="hand" d="M12 12V6"/></svg><span id="clock" data-dyn></span></span>
   <span id="status" data-dyn></span>
   <span>Được thiết kế cho bạn</span><b>/</b><span>Không áp lực</span><b>/</b><span>Không khuôn mẫu</span>
 </div></div>
@@ -371,9 +411,9 @@ footer li{list-style:none;margin-bottom:7px}footer a:hover{color:var(--accent)}
   <div class="center" style="margin-bottom:38px"><div class="kicker">Bắt đầu rất đơn giản</div><h2 class="title">Ba bước để bắt đầu</h2>
   <p class="lead">Không cần chuẩn bị gì nhiều — chỉ cần một tin nhắn và mong muốn thay đổi.</p></div>
   <div class="steps">
-    <div class="step"><div class="n">1</div><h3>Tư vấn miễn phí</h3><p>Nhắn Zalo hoặc gọi trực tiếp. Mình lắng nghe mục tiêu, lịch sinh hoạt và tình trạng sức khỏe hiện tại của bạn.</p></div>
-    <div class="step"><div class="n">2</div><h3>Đánh giá thể trạng</h3><p>Kiểm tra thể trạng, đo số đo và đánh giá vận động để xây lộ trình vừa sức với bạn.</p></div>
-    <div class="step"><div class="n">3</div><h3>Lộ trình riêng cho bạn</h3><p>Nhận giáo án theo tuần, hướng dẫn dinh dưỡng và theo dõi tiến bộ định kỳ để điều chỉnh kịp thời.</p></div>
+    <div class="step"><svg class="ico i-bob" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path class="dots3" d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/></svg><div class="n">1</div><h3>Tư vấn miễn phí</h3><p>Nhắn Zalo hoặc gọi trực tiếp. Mình lắng nghe mục tiêu, lịch sinh hoạt và tình trạng sức khỏe hiện tại của bạn.</p></div>
+    <div class="step"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.4A4 4 0 0 1 19 10c0 5.600-7 10-7 10z" class="i-beat"/><path class="i-draw" d="M3 12h4l2-4 3 7 2-3h7"/></svg><div class="n">2</div><h3>Đánh giá thể trạng</h3><p>Kiểm tra thể trạng, đo số đo và đánh giá vận động để xây lộ trình vừa sức với bạn.</p></div>
+    <div class="step"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4"/><path class="i-wave" d="M6 5h11l-2 4 2 4H6z"/></svg><div class="n">3</div><h3>Lộ trình riêng cho bạn</h3><p>Nhận giáo án theo tuần, hướng dẫn dinh dưỡng và theo dõi tiến bộ định kỳ để điều chỉnh kịp thời.</p></div>
   </div>
 </div></section>
 
@@ -564,6 +604,7 @@ footer li{list-style:none;margin-bottom:7px}footer a:hover{color:var(--accent)}
   <div class="kicker">Liên hệ</div>
   <h2>Sẵn sàng để thấy<br>mình khác đi?</h2>
   <p>Hãy kể cho Thanh Tâm biết mục tiêu của bạn. Buổi tư vấn đầu tiên là bước nhỏ nhưng quan trọng.</p>
+  <p style="font:700 20px var(--head);letter-spacing:.12em;text-transform:uppercase;color:var(--text);margin-bottom:22px">Giờ mở cửa: 5:00 – 21:00</p>
   <div class="cta"><a class="btn fill" href="tel:0702791521">Gọi 0702 791 521</a><a class="btn" href="https://zalo.me/0702791521" target="_blank" rel="noopener">Zalo</a></div>
 </div></section>
 
@@ -579,7 +620,7 @@ footer li{list-style:none;margin-bottom:7px}footer a:hover{color:var(--accent)}
       <label>Tên của bạn<input name="name" autocomplete="name" required maxlength="80"></label>
       <label>Số điện thoại / Zalo<input name="phone" type="tel" autocomplete="tel" required maxlength="20"></label>
       <label class="full">Mục tiêu của bạn<select name="goal"><option value="Giảm mỡ – siết dáng">Giảm mỡ – siết dáng</option><option value="Tăng cơ – tăng cân">Tăng cơ – tăng cân</option><option value="Khỏe hơn, cải thiện tư thế">Khỏe hơn, cải thiện tư thế</option><option value="Tập nhóm cùng bạn bè">Tập nhóm cùng bạn bè</option><option value="Tập tại nhà (mẹ sau sinh / người lớn tuổi / bệnh nền)">Tập tại nhà (mẹ sau sinh / người lớn tuổi / bệnh nền)</option><option value="Giáo án online">Giáo án online</option><option value="Chưa rõ, cần tư vấn">Chưa rõ, cần tư vấn</option></select></label>
-      <label class="full">Thời gian tập mong muốn<select name="time"><option value="Sáng sớm (5:30–8:00)">Sáng sớm (5:30–8:00)</option><option value="Buổi trưa">Buổi trưa</option><option value="Chiều (16:00–19:00)">Chiều (16:00–19:00)</option><option value="Tối (19:00–21:00)">Tối (19:00–21:00)</option><option value="Linh hoạt">Linh hoạt</option></select></label>
+      <label class="full">Thời gian tập mong muốn<select name="time"><option value="Sáng sớm (5:00–8:00)">Sáng sớm (5:00–8:00)</option><option value="Buổi trưa">Buổi trưa</option><option value="Chiều (16:00–19:00)">Chiều (16:00–19:00)</option><option value="Tối (19:00–21:00)">Tối (19:00–21:00)</option><option value="Linh hoạt">Linh hoạt</option></select></label>
       <label class="full">Ghi chú thêm (không bắt buộc)<textarea name="note" maxlength="500"></textarea></label>
       <div class="full cta" style="justify-content:flex-start"><button class="btn fill" type="submit" id="send" data-dyn></button></div>
       <div class="full" id="formErr" data-dyn style="font-size:14px;color:var(--accent);min-height:20px" aria-live="polite"></div>
@@ -605,12 +646,20 @@ footer li{list-style:none;margin-bottom:7px}footer a:hover{color:var(--accent)}
     <div><div class="logo" style="color:var(--text);margin-bottom:10px">Thanh Tâm <b>Fitness</b></div>
       <p>Huấn luyện cá nhân hóa tại Quy Nhơn. HLV Nguyễn Thị Thanh Tâm — chứng chỉ hành nghề mã 188.T09.26, Liên đoàn Cử tạ – Thể hình TP.HCM.</p></div>
     <div><h4>Khám phá</h4><ul><li><a href="#services">Gói tập</a></li><li><a href="#home-training">Tập tại nhà</a></li><li><a href="#nutrition">Dinh dưỡng</a></li><li><a href="#tools">Tính BMI &amp; calo</a></li><li><a href="#faq">Hỏi đáp</a></li></ul></div>
-    <div><h4>Liên hệ</h4><ul><li><a href="tel:0702791521">0702 791 521</a></li><li><a href="tel:0876176669">0876 176 669 (số phụ)</a></li><li><a href="https://zalo.me/0702791521" target="_blank" rel="noopener">Zalo</a></li><li><a href="https://hlvthanhtam.netlify.app/" target="_blank" rel="noopener">hlvthanhtam.netlify.app</a></li></ul></div>
+    <div><h4>Liên hệ</h4><ul><li>Giờ mở cửa: 5:00 – 21:00</li><li><a href="tel:0702791521">0702 791 521</a></li><li><a href="tel:0876176669">0876 176 669 (số phụ)</a></li><li><a href="https://zalo.me/0702791521" target="_blank" rel="noopener">Zalo</a></li><li><a href="https://hlvthanhtam.netlify.app/" target="_blank" rel="noopener">hlvthanhtam.netlify.app</a></li></ul></div>
   </div>
   <div class="legal">© <span id="yr"></span> Thanh Tâm Fitness. Huấn luyện thể hình không thay thế điều trị hay tư vấn y tế.</div>
 </div></footer>
 
 <a class="btn sm fill callfab" href="https://zalo.me/0702791521" target="_blank" rel="noopener">Nhắn Zalo</a>
+
+<button class="chatfab" id="chatBtn" type="button" aria-label="Trợ lý AI" aria-expanded="false"><svg class="i-bob" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path class="dots3" d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/></svg></button>
+<div class="chat" id="chat" role="dialog" aria-labelledby="chatTitle" hidden data-dyn>
+  <header><span id="chatTitle"></span><button type="button" id="chatClose" aria-label="×">×</button></header>
+  <div class="log" id="chatLog" aria-live="polite"></div>
+  <div class="note" id="chatNote"></div>
+  <form id="chatForm"><input id="chatIn" maxlength="800" autocomplete="off"><button type="submit" id="chatSend"></button></form>
+</div>
 
 <div class="modal" id="ok" role="dialog" aria-modal="true" aria-labelledby="okT" hidden>
   <div class="mbox">
