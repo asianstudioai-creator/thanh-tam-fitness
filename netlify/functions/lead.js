@@ -48,6 +48,17 @@ exports.handler = async event => {
   try { b = JSON.parse(event.body || '{}'); } catch (e) { return json(400, { ok: false }); }
   if (b['bot-field']) return json(200, { ok: true }); // thư rác: giả vờ thành công
 
+  if (b.type === 'review') {
+    const who = clean(b.name, 80), body = clean(b.text, 800), stars = Math.max(1, Math.min(5, parseInt(b.stars, 10) || 5));
+    if (who.length < 2 || body.length < 10) return json(400, { ok: false });
+    const msg = ['⭐ ĐÁNH GIÁ MỚI CỦA HỌC VIÊN', 'Tên: ' + who, 'Số sao: ' + stars + '/5', 'Nội dung: ' + body,
+      'Muốn hiển thị trên trang: thêm vào file reviews.js'].join('\n');
+    const [z, f] = await Promise.all([sendZalo(msg), sendFacebook(msg)]);
+    console.log('Đánh giá — Zalo:', z, '| Facebook:', f);
+    const done = z === 'sent' || f === 'sent';
+    return json(done ? 200 : 502, { ok: done });
+  }
+
   const name = clean(b.name, 80), phone = clean(b.phone, 20);
   if (name.length < 2 || !/^\+?[\d\s.\-()]{8,20}$/.test(phone)) return json(400, { ok: false });
 

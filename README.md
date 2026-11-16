@@ -8,6 +8,8 @@ Trang tĩnh (HTML/CSS/JS thuần), chạy trên Netlify. Bốn ngôn ngữ: Vi�
 | `i18n.js` | Bảng dịch: khóa là câu tiếng Việt, giá trị là `[English, 中文, Русский]` |
 | `app.js` | Chuyển ngôn ngữ, băng chuyền, công cụ BMI, gửi đăng ký |
 | `netlify/functions/lead.js` | Nhận đăng ký, tự gửi tin về Zalo OA và Facebook Messenger |
+| `netlify/functions/clips.js` | Lấy clip mới nhất của Trang Facebook để mục clip tự cập nhật |
+| `reviews.js` | Danh sách đánh giá của học viên hiển thị trên trang |
 | `netlify.toml` | Cấu hình Netlify |
 
 ## Sửa nội dung
@@ -35,6 +37,7 @@ Chưa đặt biến nào thì kênh đó bị bỏ qua, đăng ký vẫn đượ
 | `ZALO_RECIPIENT_USER_ID` | Mã người dùng Zalo của người nhận tin (người này phải bấm Quan tâm OA) |
 | `FB_PAGE_ACCESS_TOKEN` | Trang (Page) Facebook → developers.facebook.com → ứng dụng có quyền `pages_messaging` |
 | `FB_RECIPIENT_PSID` | Mã PSID của người nhận tin (người này phải từng nhắn cho Trang) |
+| `FB_PAGE_ID` | Mã số của Trang Facebook; có biến này cùng `FB_PAGE_ACCESS_TOKEN` thì mục clip tự lấy clip mới |
 | `FB_MESSAGE_TAG` | Không bắt buộc; mặc định `ACCOUNT_UPDATE` |
 
 Lưu ý:
@@ -42,6 +45,11 @@ Lưu ý:
 - Messenger chỉ gửi tự động được từ **Trang (Page)**, không gửi được từ trang cá nhân.
 - Mã truy cập Zalo OA hết hạn sau khoảng một ngày; cần làm mới định kỳ bằng refresh token, phần này chưa có trong mã.
 - Phần gọi Zalo và Facebook chưa được chạy thử với tài khoản thật.
+
+## Clip và đánh giá
+
+- Clip: chưa đặt `FB_PAGE_ID` thì trang dùng danh sách clip cố định trong `app.js`. Facebook chỉ cho lấy clip tự động từ Trang (Page), không cho lấy từ trang cá nhân.
+- Đánh giá: học viên gửi qua biểu mẫu trên trang (Netlify Forms, biểu mẫu `danh-gia`). Đánh giá không tự hiện; muốn hiện thì chép vào `reviews.js`. Chỉ đăng đánh giá thật, đã được học viên đồng ý.
 
 ## Đưa lên Netlify
 

@@ -164,6 +164,9 @@ html[lang^=zh] h1,html[lang^=zh] h2,html[lang^=zh] h3{letter-spacing:.04em}
 .rev .stars{color:var(--accent);letter-spacing:.2em;font-size:16px}
 .rev blockquote{font-size:15px;flex:1}
 .rev cite{font:700 17px var(--head);font-style:normal;letter-spacing:.06em;text-transform:uppercase}
+.revs:empty{display:none}
+.chk{display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font:400 14px var(--body);color:var(--text);cursor:pointer}
+.chk input{width:18px;height:18px;flex:none;accent-color:var(--accent)}
 .rev cite small{display:block;font:400 12px var(--body);color:var(--muted);text-transform:none;letter-spacing:0}
 
 /* ---------- about ---------- */
@@ -421,11 +424,27 @@ footer li{list-style:none;margin-bottom:7px}footer a:hover{color:var(--accent)}
   <div class="clips" id="clips" data-dyn></div>
 </div></section>
 
-<!-- ================= REVIEWS (hiện khi reviews.js có nội dung) ================= -->
-<section id="reviews" style="padding-top:0" hidden><div class="wrap">
+<!-- ================= REVIEWS (danh sách lấy từ reviews.js) ================= -->
+<section id="reviews" style="padding-top:0"><div class="wrap">
   <div class="kicker">Đánh giá</div><h2 class="title">Học viên nói gì</h2>
   <p class="lead" style="margin-bottom:30px">Chia sẻ thật từ học viên đã và đang tập cùng Thanh Tâm.</p>
   <div class="revs" id="revs" data-dyn></div>
+  <div class="two" style="margin-top:34px">
+    <div>
+      <h3 style="font-size:30px">Bạn đã tập cùng Thanh Tâm?</h3>
+      <p class="lead" style="margin-top:10px">Hãy để lại vài dòng chia sẻ. Đánh giá được Thanh Tâm xem qua trước khi hiển thị trên trang.</p>
+    </div>
+    <form class="panel fields" id="rvForm" name="danh-gia" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+      <input type="hidden" name="form-name" value="danh-gia">
+      <p hidden><input name="bot-field" tabindex="-1" autocomplete="off"></p>
+      <label>Tên của bạn<input name="name" autocomplete="name" required maxlength="80"></label>
+      <label>Số sao<select name="stars"><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option><option value="2">★★</option><option value="1">★</option></select></label>
+      <label class="full">Đánh giá của bạn<textarea name="text" required maxlength="800"></textarea></label>
+      <label class="full chk"><input type="checkbox" name="consent"><span>Tôi đồng ý cho đăng đánh giá này trên website.</span></label>
+      <div class="full cta" style="justify-content:flex-start"><button class="btn fill" type="submit" id="rvSend" data-dyn></button></div>
+      <div class="full" id="rvErr" data-dyn style="font-size:14px;color:var(--accent);min-height:20px" aria-live="polite"></div>
+    </form>
+  </div>
 </div></section>
 
 <!-- ================= ABOUT ================= -->
@@ -596,7 +615,7 @@ footer li{list-style:none;margin-bottom:7px}footer a:hover{color:var(--accent)}
 <div class="modal" id="ok" role="dialog" aria-modal="true" aria-labelledby="okT" hidden>
   <div class="mbox">
     <div class="tick"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l8 8 15-17"/></svg></div>
-    <h3 id="okT">Đăng ký thành công!</h3>
+    <h3 id="okT" data-dyn></h3>
     <p id="okMsg" data-dyn></p>
     <div class="cta"><a class="btn sm fill" href="https://zalo.me/0702791521" target="_blank" rel="noopener">Nhắn Zalo ngay</a><button class="btn sm" id="okClose" type="button">Đóng</button></div>
   </div>

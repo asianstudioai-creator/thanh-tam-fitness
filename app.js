@@ -101,7 +101,7 @@
   // ----- clip học viên (video công khai trên Facebook của Thanh Tâm) -----
   const FB = 'https://www.facebook.com/thanh.nguyen.388949/videos/';
   // phần tử thứ ba: 1 = phát được ngay trên trang; 0 = Facebook không cho nhúng, bấm sẽ mở Facebook
-  const clips = [
+  let clips = [
     ['3353337454864585', 'Chỉ cần mấy chế muốn tập, mấy giờ 15 cô gái cũng xuất hiện hết trọi.', 1],
     ['1792210085336613', 'Đã không tập thì thôi, chớ tập là khéo bị mê.', 1],
     ['1684562006717363', 'Cứ làm tốt nhất trong khả năng, kết quả tốt đến đâu còn tuỳ ý trời 😁', 1],
@@ -112,15 +112,17 @@
     ['1877590463414718', 'Riêng chủ nhật là bao rộng rãi thoáng mát nha!', 0]
   ];
   const playing = new Set();
-  const clipFrame = id => `<iframe src="https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(FB + id + '/')}&show_text=false&autoplay=true" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="Clip"></iframe>`;
+  const clipUrl = id => { const c = clips.find(x => x[0] === id); return (c && c[3]) || FB + id + '/'; };
+  const clipFrame = id => `<iframe src="https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(clipUrl(id))}&show_text=false&autoplay=true" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="Clip"></iframe>`;
   function renderClips() {
-    $('clips').innerHTML = clips.map(([id, cap, embed], i) => {
+    $('clips').innerHTML = clips.map(([id, cap, embed, link], i) => {
+      const url = link || FB + id + '/';
       const no = `<span class="no">${String(i + 1).padStart(2, '0')}</span>`;
       const inner = playing.has(id) ? clipFrame(id)
         : embed ? `${no}<button class="play" type="button" aria-label="${t('Xem clip')} ${i + 1}"><i>▶</i>${t('Xem clip')}</button>`
-        : `${no}<a class="play" href="${FB + id}/" target="_blank" rel="noopener"><i>▶</i>${t('Xem trên Facebook')}</a>`;
+        : `${no}<a class="play" href="${url}" target="_blank" rel="noopener"><i>▶</i>${t('Xem trên Facebook')}</a>`;
       return `<div class="clip"><div class="frame" data-id="${id}">${inner}</div>
-  <div class="cap"><p>${cap}</p><a class="more" href="${FB + id}/" target="_blank" rel="noopener">${t('Mở trên Facebook')}</a></div></div>`;
+  <div class="cap"><p>${cap}</p><a class="more" href="${url}" target="_blank" rel="noopener">${t('Mở trên Facebook')}</a></div></div>`;
     }).join('');
   }
   $('clips').addEventListener('click', e => {
@@ -131,11 +133,18 @@
     fr.innerHTML = clipFrame(fr.dataset.id);
   });
 
-  // ----- đánh giá của học viên: chỉ hiện khi reviews.js có nội dung thật -----
-  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // tự cập nhật: nếu chương trình trên Netlify lấy được clip mới từ Trang Facebook thì thay danh sách cố định ở trên
+  fetch('/.netlify/functions/clips').then(r => (r.ok ? r.json() : null)).then(d => {
+    const list = d && Array.isArray(d.clips) ? d.clips.filter(c => c && /^\d+$/.test(c.id) && /^https:\/\/(www\.)?facebook\.com\//.test(c.url)) : [];
+    if (!list.length) return;
+    clips = list.slice(0, 12).map(c => [c.id, esc(c.caption || ''), c.embed ? 1 : 0, c.url]);
+    renderClips();
+  }).catch(() => {});
+
+  // ----- đánh giá của học viên: danh sách chỉ hiện khi reviews.js có nội dung thật -----
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   function renderReviews() {
     const list = (window.REVIEWS || []).filter(r => r && r.name && r.text);
-    $('reviews').hidden = !list.length;
     $('revs').innerHTML = list.map(r => `<figure class="rev">${r.stars ? `<div class="stars" aria-label="${r.stars}/5">${'★'.repeat(Math.max(1, Math.min(5, r.stars)))}</div>` : ''}
   <blockquote>${esc(r.text)}</blockquote><figcaption><cite>${esc(r.name)}${r.detail ? `<small>${esc(r.detail)}</small>` : ''}</cite></figcaption></figure>`).join('');
   }
@@ -160,12 +169,26 @@
 
   // ----- đăng ký tư vấn -----
   const lead = $('lead'), send = $('send'), formErr = $('formErr'), ok = $('ok'), okMsg = $('okMsg');
-  let busy = false, errKey = '', okData = null;
+  const rv = $('rvForm'), rvSend = $('rvSend'), rvErr = $('rvErr');
+  let busy = false, errKey = '', okData = null, rvBusy = false, rvErrKey = '';
+  // gửi cùng lúc tới chương trình báo Zalo/Messenger và tới Netlify Forms (bản dự phòng); một nơi nhận là đủ
+  async function postBoth(formName, data) {
+    const good = r => { if (!r.ok) throw new Error(r.status); return true; };
+    const results = await Promise.allSettled([
+      fetch('/.netlify/functions/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(good),
+      fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ 'form-name': formName, 'bot-field': '', ...data }).toString() }).then(good)
+    ]);
+    return results.some(r => r.status === 'fulfilled');
+  }
+  function showOk(data) { okData = data; renderForm(); ok.hidden = false; $('okClose').focus(); }
   function renderForm() {
     send.textContent = t(busy ? 'Đang gửi…' : 'Đăng ký ngay');
     send.disabled = busy;
     formErr.textContent = errKey ? t(errKey) : '';
-    if (okData) okMsg.textContent = t('Cảm ơn {name}! Thanh Tâm đã nhận được thông tin và sẽ liên hệ lại với bạn qua số {phone} sớm nhất có thể.', okData);
+    rvSend.textContent = t(rvBusy ? 'Đang gửi…' : 'Gửi đánh giá');
+    rvSend.disabled = rvBusy;
+    rvErr.textContent = rvErrKey ? t(rvErrKey) : '';
+    if (okData) { $('okT').textContent = t(okData.title); okMsg.textContent = t(okData.msg, okData.vars); }
   }
   function closeOk() { ok.hidden = true; }
   $('okClose').onclick = closeOk;
@@ -183,21 +206,34 @@
     }
     const data = { name, phone, goal: f.goal.value, time: f.time.value, note: f.note.value.trim(), lang };
     busy = true; errKey = ''; renderForm();
-    const good = r => { if (!r.ok) throw new Error(r.status); return true; };
-    // 1) chương trình tự động gửi Zalo + Messenger   2) lưu vào Netlify Forms làm bản dự phòng
-    const results = await Promise.allSettled([
-      fetch('/.netlify/functions/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(good),
-      fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ 'form-name': 'dang-ky', 'bot-field': '', ...data }).toString() }).then(good)
-    ]);
+    const sent = await postBoth('dang-ky', data);
     busy = false;
-    if (results.some(r => r.status === 'fulfilled')) {
-      okData = { name, phone };
+    if (sent) {
       lead.reset();
-      renderForm();
-      ok.hidden = false;
-      $('okClose').focus();
+      showOk({ title: 'Đăng ký thành công!', msg: 'Cảm ơn {name}! Thanh Tâm đã nhận được thông tin và sẽ liên hệ lại với bạn qua số {phone} sớm nhất có thể.', vars: { name, phone } });
     } else {
       errKey = 'Chưa gửi được đăng ký. Bạn vui lòng nhắn Zalo 0702 791 521 hoặc thử lại sau.';
+      renderForm();
+    }
+  });
+
+  // ----- học viên gửi đánh giá -----
+  rv.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (rvBusy) return;
+    const f = rv.elements;
+    if (f['bot-field'].value) return;
+    const name = f.name.value.trim(), text = f.text.value.trim();
+    if (name.length < 2 || text.length < 10) { rvErrKey = 'Vui lòng nhập tên và viết ít nhất một câu đánh giá.'; renderForm(); return; }
+    if (!f.consent.checked) { rvErrKey = 'Vui lòng đánh dấu đồng ý cho đăng đánh giá.'; renderForm(); return; }
+    rvBusy = true; rvErrKey = ''; renderForm();
+    const sent = await postBoth('danh-gia', { type: 'review', name, stars: f.stars.value, text, lang });
+    rvBusy = false;
+    if (sent) {
+      rv.reset();
+      showOk({ title: 'Cảm ơn bạn đã đánh giá!', msg: 'Đánh giá của bạn đã được gửi tới Thanh Tâm và sẽ hiển thị trên trang sau khi được xem qua.', vars: {} });
+    } else {
+      rvErrKey = 'Chưa gửi được đánh giá. Bạn vui lòng thử lại sau.';
       renderForm();
     }
   });
