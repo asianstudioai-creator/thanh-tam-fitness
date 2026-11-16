@@ -98,6 +98,48 @@
     }).join('');
   }
 
+  // ----- clip học viên (video công khai trên Facebook của Thanh Tâm) -----
+  const FB = 'https://www.facebook.com/thanh.nguyen.388949/videos/';
+  // phần tử thứ ba: 1 = phát được ngay trên trang; 0 = Facebook không cho nhúng, bấm sẽ mở Facebook
+  const clips = [
+    ['3353337454864585', 'Chỉ cần mấy chế muốn tập, mấy giờ 15 cô gái cũng xuất hiện hết trọi.', 1],
+    ['1792210085336613', 'Đã không tập thì thôi, chớ tập là khéo bị mê.', 1],
+    ['1684562006717363', 'Cứ làm tốt nhất trong khả năng, kết quả tốt đến đâu còn tuỳ ý trời 😁', 1],
+    ['1908607717142199', 'Khó ở đâu, ta tìm cách giải ở đó ☺️', 1],
+    ['1677534527246714', 'Điểm danh đầu tuần nào các trai xinh gái đẹp của tui 😊', 0],
+    ['995440633000839', 'Sáng thứ 7 quá trời năng lượng rồi mấy nàng của tui.', 0],
+    ['1416310901567958', 'Tag đứa bạn từng rủ rê mấy nàng đi tập vào đây 😄', 0],
+    ['1877590463414718', 'Riêng chủ nhật là bao rộng rãi thoáng mát nha!', 0]
+  ];
+  const playing = new Set();
+  const clipFrame = id => `<iframe src="https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(FB + id + '/')}&show_text=false&autoplay=true" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="Clip"></iframe>`;
+  function renderClips() {
+    $('clips').innerHTML = clips.map(([id, cap, embed], i) => {
+      const no = `<span class="no">${String(i + 1).padStart(2, '0')}</span>`;
+      const inner = playing.has(id) ? clipFrame(id)
+        : embed ? `${no}<button class="play" type="button" aria-label="${t('Xem clip')} ${i + 1}"><i>▶</i>${t('Xem clip')}</button>`
+        : `${no}<a class="play" href="${FB + id}/" target="_blank" rel="noopener"><i>▶</i>${t('Xem trên Facebook')}</a>`;
+      return `<div class="clip"><div class="frame" data-id="${id}">${inner}</div>
+  <div class="cap"><p>${cap}</p><a class="more" href="${FB + id}/" target="_blank" rel="noopener">${t('Mở trên Facebook')}</a></div></div>`;
+    }).join('');
+  }
+  $('clips').addEventListener('click', e => {
+    const b = e.target.closest('button.play');
+    if (!b) return;
+    const fr = b.parentElement;
+    playing.add(fr.dataset.id);
+    fr.innerHTML = clipFrame(fr.dataset.id);
+  });
+
+  // ----- đánh giá của học viên: chỉ hiện khi reviews.js có nội dung thật -----
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  function renderReviews() {
+    const list = (window.REVIEWS || []).filter(r => r && r.name && r.text);
+    $('reviews').hidden = !list.length;
+    $('revs').innerHTML = list.map(r => `<figure class="rev">${r.stars ? `<div class="stars" aria-label="${r.stars}/5">${'★'.repeat(Math.max(1, Math.min(5, r.stars)))}</div>` : ''}
+  <blockquote>${esc(r.text)}</blockquote><figcaption><cite>${esc(r.name)}${r.detail ? `<small>${esc(r.detail)}</small>` : ''}</cite></figcaption></figure>`).join('');
+  }
+
   // ----- BMI & calo -----
   const calc = $('calc'), res = $('result');
   function renderResult() {
@@ -167,7 +209,7 @@
     root.lang = lang === 'zh' ? 'zh-Hans' : lang;
     sel.value = lang;
     if (save) { try { localStorage.setItem('lang', lang); } catch (e) {} }
-    translateStatic(); renderStatus(); renderVideos(); renderResult(); renderForm();
+    translateStatic(); renderStatus(); renderVideos(); renderClips(); renderReviews(); renderResult(); renderForm();
   }
   sel.onchange = () => setLang(sel.value, true);
   let first = new URLSearchParams(location.search).get('lang');

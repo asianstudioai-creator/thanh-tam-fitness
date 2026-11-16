@@ -129,6 +129,19 @@ window.I18N = {
   "Lưu ý quan trọng về sức khỏe": ["Important health notice", "重要健康提示", "Важное о здоровье"],
   "Huấn luyện thể hình không thay thế điều trị hay tư vấn y tế. Nếu bạn mới sinh (nhất là sau sinh mổ), đang mang thai, có bệnh tim mạch, huyết áp, tiểu đường, xương khớp hoặc đang dùng thuốc, hãy hỏi bác sĩ về mức độ vận động phù hợp trước khi tập. Thanh Tâm sẽ điều chỉnh bài tập theo hướng dẫn đó và dừng ngay khi bạn thấy không ổn.": ["Fitness coaching does not replace medical treatment or advice. If you have recently given birth (especially by C-section), are pregnant, have heart, blood-pressure, diabetes or joint conditions, or take medication, ask your doctor what level of activity is right before training. Thanh Tâm will adapt the exercises to that guidance and stop as soon as you feel unwell.", "健身训练不能替代医疗或医嘱。如果您刚生产（尤其是剖腹产）、正在怀孕、患有心血管、血压、糖尿病、骨关节疾病或正在服药，请在训练前向医生咨询合适的运动强度。Thanh Tâm 会按医嘱调整动作，您感到不适时立即停止。", "Фитнес-тренировки не заменяют лечение и консультацию врача. Если вы недавно родили (особенно после кесарева сечения), беременны, имеете заболевания сердца, давление, диабет, проблемы с суставами или принимаете лекарства, до начала занятий спросите врача о допустимой нагрузке. Тхань Там подстроит упражнения под эти рекомендации и сразу остановит занятие, если вам станет нехорошо."],
 
+  // ---------- clip & đánh giá học viên ----------
+  "Clip học viên": ["Client clips", "学员视频", "Видео учеников"],
+  "Học viên": ["Clients", "学员", "Ученики"],
+  "trong buổi tập": ["in training", "训练实拍", "на тренировках"],
+  "Những buổi tập thật của học viên cùng Thanh Tâm tại Quy Nhơn. Bấm vào clip để xem.": ["Real sessions of clients training with Thanh Tâm in Quy Nhơn. Tap a clip to watch.", "学员在归仁与 Thanh Tâm 一起训练的真实画面。点击视频即可观看。", "Реальные тренировки учеников с Тхань Там в Куиньоне. Нажмите на видео, чтобы посмотреть."],
+  "Xem thêm trên Facebook": ["More on Facebook", "在 Facebook 查看更多", "Больше на Facebook"],
+  "Xem clip": ["Watch clip", "观看视频", "Смотреть"],
+  "Xem trên Facebook": ["Watch on Facebook", "在 Facebook 观看", "Смотреть в Facebook"],
+  "Mở trên Facebook": ["Open on Facebook", "在 Facebook 打开", "Открыть в Facebook"],
+  "Đánh giá": ["Reviews", "评价", "Отзывы"],
+  "Học viên nói gì": ["What clients say", "学员怎么说", "Что говорят ученики"],
+  "Chia sẻ thật từ học viên đã và đang tập cùng Thanh Tâm.": ["Real words from clients who train or have trained with Thanh Tâm.", "来自曾经和正在跟 Thanh Tâm 训练的学员的真实分享。", "Настоящие отзывы тех, кто занимается или занимался с Тхань Там."],
+
   // ---------- giới thiệu ----------
   "Xin chào, mình là Thanh Tâm": ["Hi, I'm Thanh Tâm", "您好，我是 Thanh Tâm", "Здравствуйте, я Тхань Там"],
   "Không cần hoàn hảo.": ["No need to be perfect.", "不必完美。", "Идеал не нужен."],
