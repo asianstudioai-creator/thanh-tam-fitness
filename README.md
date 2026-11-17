@@ -56,4 +56,9 @@ Lưu ý:
 
 ## Đưa lên Netlify
 
-Netlify → Add new site → Import an existing project → chọn kho GitHub này. Không cần lệnh build; thư mục xuất bản là thư mục gốc. Bật Forms trong Netlify → Forms.
+Trang đang chạy ở hai nơi (từ 17/11/2026):
+
+- **Netlify (trang chính, đủ tính năng):** https://thanhtamfitness.netlify.app/ — dự án `thanhtamfitness`. Dự án này **không nối với GitHub**: nó được tạo bằng cách tải tệp zip lên (Netlify Drop). Mỗi lần sửa trang phải tải lại: chạy `git archive --format=zip -o thanh-tam-fitness.zip HEAD` rồi kéo thả tệp zip vào Netlify → Deploys. Forms đã bật, nhận hai biểu mẫu `dang-ky` và `danh-gia`.
+- **GitHub Pages (bản phụ):** https://asianstudioai-creator.github.io/thanh-tam-fitness/ — tự cập nhật khi đẩy mã lên nhánh `main`, nhưng không lưu biểu mẫu và không chạy các chương trình trong `netlify/functions`.
+
+Muốn Netlify tự cập nhật theo GitHub: Netlify → Project configuration → Build & deploy → Link repository, chọn kho này; không cần lệnh build, thư mục xuất bản là thư mục gốc.
